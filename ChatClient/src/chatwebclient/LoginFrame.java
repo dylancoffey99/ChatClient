@@ -123,7 +123,7 @@ public class LoginFrame extends JFrame implements ActionListener {
                     username.setText("");
                     password.setText("");
                     username.requestFocusInWindow();
-                    // client = new ClientFrame(value, parent);
+                    client = new ClientFrame(value, parent);
                     setVisible(false);
             }
         }

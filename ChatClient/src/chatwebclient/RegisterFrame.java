@@ -148,7 +148,7 @@ public class RegisterFrame extends JFrame implements ActionListener {
                     password.setText("");
                     rptpassword.setText("");
                     username.requestFocusInWindow();
-                    // client = new ClientFrame(value, parent);
+                    client = new ClientFrame(value, parent);
                     setVisible(false);
             }
         }
