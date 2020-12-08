@@ -77,9 +77,11 @@ public class ChatWebClient extends JFrame implements ActionListener {
             Object source = e.getSource();
             if(source == login) {
                 LoginFrame myLogin = new LoginFrame(this);
+                setVisible(false);
             }
             if(source == register) {
                 RegisterFrame myRegister = new RegisterFrame(this);
+                setVisible(false);
             }
         } catch(Exception ee) {
             System.err.println(ee.getMessage());

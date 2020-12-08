@@ -23,7 +23,7 @@ public class ClientFrame extends JFrame implements ActionListener {
     private ChatWebService proxy;
     private ChatWebService_Service port;
     private DefaultListModel dlm;
-    private int userid;
+    private int uid, sid;
     private JButton messageSend, multiSend, logout;
     private JFrame parent;
     private JLabel userLbl, messageLbl, multiLbl;
@@ -32,13 +32,16 @@ public class ClientFrame extends JFrame implements ActionListener {
     private JTextArea messageArea, multiArea;
     private JTextField messageField, multiField;
     private List users;
+    private String reciever;
     
     public ClientFrame(int u, JFrame pops) {
         parent = pops;
         port = new ChatWebService_Service();
         proxy = port.getChatWebServicePort();
         
-        userid = u;
+        uid = u;
+        sid = proxy.newSession(uid);
+        reciever = "mary_123";
         
         // Frame Title and Size
         setTitle("Chat Web Client - Welcome");
@@ -51,11 +54,7 @@ public class ClientFrame extends JFrame implements ActionListener {
 
         // User Label & User List with scrollable pane
         userLbl = new JLabel("Users:");
-        dlm = new DefaultListModel();
-        users = proxy.getUsers(true);
-        for (int i = 0; i < users.size(); i++) {
-            dlm.addElement(users.get(i));
-        }
+        dlm = new DefaultListModel();      
         userList = new JList(dlm);
         userList.setFixedCellHeight(35);
         userList.setFixedCellWidth(100);
@@ -67,9 +66,18 @@ public class ClientFrame extends JFrame implements ActionListener {
         panel.add(userLbl);
         panel.add(userListPane);
         
-        // Message Label & Message TextArea with scrollable pane
+        users = proxy.getUsers(true);
+        for (int i = 0; i < users.size(); i++) {
+            dlm.addElement(users.get(i));
+        }
+        
+        // Message Label
         messageLbl = new JLabel("Messages:");
-        messageArea = new JTextArea(16,47);
+        
+        // Message TextArea with scrollable pane
+        ThreadedChat thread = new ThreadedChat(proxy, uid, sid, reciever);
+        thread.start();
+        messageArea = thread.getMessageArea();
         messageArea.setEditable(false);
         messageAreaPane = new JScrollPane(messageArea);
         layout.putConstraint(SpringLayout.NORTH, messageLbl, 20, SpringLayout.NORTH, panel);
