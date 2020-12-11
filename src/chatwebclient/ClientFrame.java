@@ -7,22 +7,22 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
-import java.util.List;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
-public class ClientFrame extends JFrame implements ActionListener {
+public class ClientFrame extends JFrame implements ActionListener, ListSelectionListener {
     private ChatWebService proxy;
     private ChatWebService_Service port;
-    private DefaultListModel dlm;
     private int uid, sid;
     private JButton messageSend, multiSend, logout;
     private JFrame parent;
@@ -31,17 +31,18 @@ public class ClientFrame extends JFrame implements ActionListener {
     private JScrollPane userListPane, messageAreaPane, multiAreaPane;
     private JTextArea messageArea, multiArea;
     private JTextField messageField, multiField;
-    private List users;
-    private String reciever;
+    private ThreadedChat thread;
     
-    public ClientFrame(int u, JFrame pops) {
+    public ClientFrame(int u, String username, JFrame pops) {
         parent = pops;
         port = new ChatWebService_Service();
         proxy = port.getChatWebServicePort();
         
         uid = u;
         sid = proxy.newSession(uid);
-        reciever = "mary_123";
+        
+        thread = new ThreadedChat(proxy, uid, sid, username);
+        thread.start();
         
         // Frame Title and Size
         setTitle("Chat Web Client - Welcome");
@@ -54,10 +55,11 @@ public class ClientFrame extends JFrame implements ActionListener {
 
         // User Label & User List with scrollable pane
         userLbl = new JLabel("Users:");
-        dlm = new DefaultListModel();      
-        userList = new JList(dlm);
+        userList = thread.getUserList();
         userList.setFixedCellHeight(35);
         userList.setFixedCellWidth(100);
+        userList.addListSelectionListener(this);
+        userList.setSelectedIndex(0);
         userListPane = new JScrollPane(userList);
         layout.putConstraint(SpringLayout.NORTH, userLbl, 20, SpringLayout.NORTH, panel);
         layout.putConstraint(SpringLayout.WEST, userLbl, 20, SpringLayout.WEST, panel); 
@@ -66,17 +68,8 @@ public class ClientFrame extends JFrame implements ActionListener {
         panel.add(userLbl);
         panel.add(userListPane);
         
-        users = proxy.getUsers(true);
-        for (int i = 0; i < users.size(); i++) {
-            dlm.addElement(users.get(i));
-        }
-        
-        // Message Label
+        // Message Label + Message TextArea with scrollable pane
         messageLbl = new JLabel("Messages:");
-        
-        // Message TextArea with scrollable pane
-        ThreadedChat thread = new ThreadedChat(proxy, uid, sid, reciever);
-        thread.start();
         messageArea = thread.getMessageArea();
         messageArea.setEditable(false);
         messageAreaPane = new JScrollPane(messageArea);
@@ -135,6 +128,7 @@ public class ClientFrame extends JFrame implements ActionListener {
         WindowListener exitListener = new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
+                proxy.logOut(uid, sid);
                 parent.setVisible(true);
                 dispose();
             }
@@ -151,12 +145,32 @@ public class ClientFrame extends JFrame implements ActionListener {
     }
     
     @Override
+    public void valueChanged(ListSelectionEvent e) {
+        thread.interrupt();
+    }
+    
+    @Override
     public void actionPerformed(ActionEvent e) {
         Object source = e.getSource();
         
+        try {
+            if(source == messageSend) {
+                String message = messageField.getText();
+                String reciever = userList.getSelectedValue().toString();
+                proxy.postMessage(uid, sid, reciever, message);
+                messageField.setText("");
+            }
+        }
+        catch(Exception ee) {
+            JOptionPane.showMessageDialog(null, "User has not been selected!\nTry again.");
+            messageField.setText("");
+            messageField.requestFocusInWindow();
+        }
+
         if(source == logout) {
-            setVisible(false);
+            proxy.logOut(uid, sid);
             parent.setVisible(true);
+            dispose();
         }
     }
 }

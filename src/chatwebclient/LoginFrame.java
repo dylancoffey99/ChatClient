@@ -20,7 +20,6 @@ public class LoginFrame extends JFrame implements ActionListener {
     private ChatWebClient parent;
     private ChatWebService proxy;
     private ChatWebService_Service port;
-    private ClientFrame client;
     private JButton clear, submit;
     private JLabel usernameLbl, passwordLbl;
     private JTextField username, password;
@@ -103,8 +102,9 @@ public class LoginFrame extends JFrame implements ActionListener {
             String u = username.getText();
             String p = password.getText();
             
-            int value = proxy.checkLogin(u, p);
-            switch(value) {
+            int uid = proxy.checkLogin(u, p);
+    
+            switch(uid) {
                 case 0:
                     JOptionPane.showMessageDialog(null, "Invalid credentials.\nTry again.");
                     username.setText("");
@@ -123,7 +123,7 @@ public class LoginFrame extends JFrame implements ActionListener {
                     username.setText("");
                     password.setText("");
                     username.requestFocusInWindow();
-                    client = new ClientFrame(value, parent);
+                    ClientFrame client = new ClientFrame(uid, u, parent);
                     setVisible(false);
             }
         }

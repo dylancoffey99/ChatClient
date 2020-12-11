@@ -20,7 +20,6 @@ public class RegisterFrame extends JFrame implements ActionListener {
     private ChatWebClient parent;
     private ChatWebService proxy;
     private ChatWebService_Service port;
-    private ClientFrame client;
     private JButton submit, clear;
     private JLabel nameLbl, usernameLbl, passwordLbl, rptpasswordLbl;
     private JTextField name, username, password, rptpassword;
@@ -126,8 +125,8 @@ public class RegisterFrame extends JFrame implements ActionListener {
             String p = password.getText();
             String rp = rptpassword.getText();
             
-            int value = proxy.registerUser(n, u, p, rp);
-            switch(value) {
+            int uid = proxy.registerUser(n, u, p, rp);
+            switch(uid) {
                 case 0:
                     JOptionPane.showMessageDialog(null, "Unable to add credentials.\nTry again.");
                     username.setText("");
@@ -148,7 +147,7 @@ public class RegisterFrame extends JFrame implements ActionListener {
                     password.setText("");
                     rptpassword.setText("");
                     username.requestFocusInWindow();
-                    client = new ClientFrame(value, parent);
+                    ClientFrame client = new ClientFrame(uid, u, parent);
                     setVisible(false);
             }
         }
