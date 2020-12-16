@@ -72,6 +72,7 @@ public class ClientFrame extends JFrame implements ActionListener, ListSelection
         messageLbl = new JLabel("Messages:");
         messageArea = thread.getMessageArea();
         messageArea.setEditable(false);
+        messageArea.setLineWrap(true);
         messageAreaPane = new JScrollPane(messageArea);
         layout.putConstraint(SpringLayout.NORTH, messageLbl, 20, SpringLayout.NORTH, panel);
         layout.putConstraint(SpringLayout.WEST, messageLbl, 20, SpringLayout.EAST, userListPane); 
@@ -95,8 +96,9 @@ public class ClientFrame extends JFrame implements ActionListener, ListSelection
         
         // Multicast Label & Multicast TextArea with scrollable pane
         multiLbl = new JLabel("Multicast Messages:");
-        multiArea = new JTextArea(12,47);
+        multiArea = thread.getMultiArea();
         multiArea.setEditable(false);
+        multiArea.setLineWrap(true);
         multiAreaPane = new JScrollPane(multiArea);
         layout.putConstraint(SpringLayout.NORTH, multiLbl, 40, SpringLayout.SOUTH, messageField);
         layout.putConstraint(SpringLayout.WEST, multiLbl, 20, SpringLayout.EAST, userListPane); 
@@ -164,9 +166,16 @@ public class ClientFrame extends JFrame implements ActionListener, ListSelection
         catch(Exception ee) {
             JOptionPane.showMessageDialog(null, "User has not been selected!\nTry again.");
             messageField.setText("");
+            multiField.setText("");
             messageField.requestFocusInWindow();
         }
 
+        if(source == multiSend) {
+            String message = multiField.getText();
+            proxy.postMulticast(uid, sid, message);
+            multiField.setText("");
+        }
+        
         if(source == logout) {
             proxy.logOut(uid, sid);
             parent.setVisible(true);

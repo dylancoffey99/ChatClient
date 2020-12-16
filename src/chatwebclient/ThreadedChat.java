@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.ArrayList;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
-import javax.swing.JOptionPane;
 import javax.swing.JTextArea;
 
 public class ThreadedChat extends Thread {
@@ -15,10 +14,12 @@ public class ThreadedChat extends Thread {
     private DefaultListModel dlm;
     private int uid, sid;
     private JList userList;
-    private JTextArea messageArea;   
-    private String sender, reciever, message, lastMessage;
+    private JTextArea messageArea, multiArea;
+    private String sender, reciever, message, multicast, messageTime, 
+            multicastTime, messageSender, multicastSender, lastMessage, lastMulticast;
     private List users;
-    private List<Message> messages = new ArrayList<>();  
+    private List<Message> messages = new ArrayList<>();
+    private List<Message> multicasts = new ArrayList<>();
     
     public ThreadedChat(ChatWebService p, int u, int s, String username) {     
         proxy = p;
@@ -44,7 +45,16 @@ public class ThreadedChat extends Thread {
         if (!messages.contains(null)) {
             // The last message is the message at the last index of messages
             lastMessage = messages.get(messages.size()-1).getMessage();
-            fillTextArea();
+            fillMessageArea();
+        }
+        
+        // Initialising and filling multiArea
+        multiArea = new JTextArea(12,47);
+        multicasts = proxy.getMulticast(sid, 0);
+        
+        if (!multicasts.contains(null)) {
+            lastMulticast = multicasts.get(multicasts.size()-1).getMessage();
+            fillMultiArea();
         }
     }
     
@@ -57,30 +67,64 @@ public class ThreadedChat extends Thread {
                 
                 if (!messages.contains(null)) {
                     message = messages.get(messages.size()-1).getMessage();
+                    messageTime = messages.get(messages.size()-1).getTime();
+                    messageSender = messages.get(messages.size()-1).getSender();
                     
                     if (!message.equals(lastMessage)) {
+                        messageArea.append("[" + messageTime + "] - " + messageSender + "\n");
                         messageArea.append(message + "\n");
+                        messageArea.append("\n");
                         lastMessage = messages.get(messages.size()-1).getMessage();
                     }
                 }
-            } 
+                
+                multicasts = proxy.getMulticast(sid, 0);
+                
+                if (!multicasts.contains(null)) {
+                    multicast = multicasts.get(multicasts.size()-1).getMessage();
+                    multicastTime = multicasts.get(multicasts.size()-1).getTime();
+                    multicastSender = multicasts.get(multicasts.size()-1).getSender();
+                    
+                    if (!multicast.equals(lastMulticast)) {
+                        multiArea.append("[" + multicastTime + "] - " + multicastSender + "\n");
+                        multiArea.append(multicast + "\n");
+                        multiArea.append("\n");
+                        lastMulticast = multicasts.get(multicasts.size()-1).getMessage();
+                    }
+                }
+            }
             catch (InterruptedException e) {
                 messageArea.setText("");
                 reciever = userList.getSelectedValue().toString();
                 messages = proxy.getMessages(uid, sid, reciever, 0);
                 
                 if (!messages.contains(null)) {  
-                    fillTextArea();
+                    fillMessageArea();
                     lastMessage = messages.get(messages.size()-1).getMessage();
                 }
             }
         }
     }
     
-    private void fillTextArea() {       
+    private void fillMessageArea() {       
         for (int i = 0; i < messages.size(); i++) {
             message = messages.get(i).getMessage();
+            messageTime = messages.get(i).getTime();
+            messageSender = messages.get(i).getSender();
+            messageArea.append("[" + messageTime + "] - " + messageSender + "\n");   
             messageArea.append(message + "\n");
+            messageArea.append("\n");
+        }
+    }
+    
+    private void fillMultiArea() {       
+        for (int i = 0; i < multicasts.size(); i++) {
+            multicast = multicasts.get(i).getMessage();
+            multicastTime = multicasts.get(i).getTime();
+            multicastSender = multicasts.get(i).getSender();
+            multiArea.append("[" + multicastTime + "] - " + multicastSender + "\n");   
+            multiArea.append(multicast + "\n");
+            multiArea.append("\n");
         }
     }
     
@@ -98,4 +142,9 @@ public class ThreadedChat extends Thread {
     public JTextArea getMessageArea() {
         return messageArea;
     }
+    
+    public JTextArea getMultiArea() {
+        return multiArea;
+    }
+    
 }
