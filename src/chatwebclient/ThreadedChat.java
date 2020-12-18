@@ -2,12 +2,12 @@ package chatwebclient;
 
 import chatwebservice.ChatWebService;
 import chatwebservice.Message;
-import static java.lang.Thread.sleep;
 import java.util.List;
 import java.util.ArrayList;
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JTextArea;
+import static java.lang.Thread.sleep;
 
 public class ThreadedChat extends Thread {
     private ChatWebService proxy;
@@ -146,5 +146,4 @@ public class ThreadedChat extends Thread {
     public JTextArea getMultiArea() {
         return multiArea;
     }
-    
 }

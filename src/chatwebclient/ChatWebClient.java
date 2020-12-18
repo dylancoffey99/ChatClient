@@ -87,5 +87,4 @@ public class ChatWebClient extends JFrame implements ActionListener {
             System.err.println(ee.getMessage());
         }
     }
-    
 }
