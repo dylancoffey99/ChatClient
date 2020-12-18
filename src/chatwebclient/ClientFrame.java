@@ -45,7 +45,7 @@ public class ClientFrame extends JFrame implements ActionListener, ListSelection
         thread.start();
         
         // Frame Title and Size
-        setTitle("Chat Web Client - Welcome");
+        setTitle("Chat Web Client - Welcome " + username);
         setSize(700, 700);
         
         // Panel & Layout
@@ -166,7 +166,6 @@ public class ClientFrame extends JFrame implements ActionListener, ListSelection
         catch(Exception ee) {
             JOptionPane.showMessageDialog(null, "User has not been selected!\nTry again.");
             messageField.setText("");
-            multiField.setText("");
             messageField.requestFocusInWindow();
         }
 
