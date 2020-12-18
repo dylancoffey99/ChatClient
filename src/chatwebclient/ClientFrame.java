@@ -88,7 +88,7 @@ public class ClientFrame extends JFrame implements ActionListener, ListSelection
         panel.add(messageField);
          
         // Send Button
-        messageSend = new JButton("Send");
+        messageSend = new JButton("Send Message");
         messageSend.addActionListener(this);
         layout.putConstraint(SpringLayout.NORTH, messageSend, 4, SpringLayout.SOUTH, messageField);
         layout.putConstraint(SpringLayout.EAST, messageSend, -21, SpringLayout.EAST, panel);
@@ -114,7 +114,7 @@ public class ClientFrame extends JFrame implements ActionListener, ListSelection
         panel.add(multiField);
          
         // Multicast Send Button
-        multiSend = new JButton("Send");
+        multiSend = new JButton("Send Multicast");
         multiSend.addActionListener(this);
         layout.putConstraint(SpringLayout.NORTH, multiSend, 4, SpringLayout.SOUTH, multiField);
         layout.putConstraint(SpringLayout.EAST, multiSend, -21, SpringLayout.EAST, panel);
